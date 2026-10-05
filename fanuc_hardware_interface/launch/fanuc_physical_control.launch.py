@@ -108,10 +108,14 @@ def launch_setup(context, *args, **kwargs):
         "robot_description": ParameterValue(value=robot_description, value_type=str)
     }
 
+    ros2_control_params_file = ParameterFile(ros2_control_config, allow_substs=True)
     ros_parameters = [
         robot_description,
-        ParameterFile(ros2_control_config, allow_substs=True),
+        ros2_control_params_file,
     ]
+    # Since ros2_control 6.x (ROS 2 Lyrical) controllers no longer inherit the controller manager's
+    # --params-file arguments, so every spawner is given the (substituted) parameter file explicitly.
+    param_file_argument = " --param-file " + str(ros2_control_params_file.evaluate(context))
     nodes_to_launch = []
     control_node = Node(
         package="controller_manager",
@@ -171,6 +175,7 @@ def launch_setup(context, *args, **kwargs):
             cmd=[
                 "ros2 run controller_manager spawner --controller-manager-timeout 180 joint_state_broadcaster",
                 controller_manager_name_argument,
+                param_file_argument,
             ],
             shell=True,
             output="screen",
@@ -180,6 +185,7 @@ def launch_setup(context, *args, **kwargs):
                 "ros2 run controller_manager spawner --controller-manager-timeout 180 joint_trajectory_controller",
                 jtc_activate_str,
                 controller_manager_name_argument,
+                param_file_argument,
             ],
             shell=True,
             output="screen",
@@ -188,6 +194,7 @@ def launch_setup(context, *args, **kwargs):
             cmd=[
                 "ros2 run controller_manager spawner --controller-manager-timeout 180 fanuc_gpio_controller",
                 controller_manager_name_argument,
+                param_file_argument,
             ],
             shell=True,
             output="screen",
@@ -196,6 +203,7 @@ def launch_setup(context, *args, **kwargs):
             cmd=[
                 "ros2 run controller_manager spawner --controller-manager-timeout 180 fanuc_force_sensor_broadcaster",
                 controller_manager_name_argument,
+                param_file_argument,
             ],
             shell=True,
             output="screen",
@@ -204,6 +212,7 @@ def launch_setup(context, *args, **kwargs):
             cmd=[
                 "ros2 run controller_manager spawner --controller-manager-timeout 180 force_torque_sensor_broadcaster",
                 controller_manager_name_argument,
+                param_file_argument,
             ],
             shell=True,
             output="screen",
@@ -213,6 +222,7 @@ def launch_setup(context, *args, **kwargs):
                 "ros2 run controller_manager spawner --controller-manager-timeout 180 fanuc_rmi_controller",
                 frc_activate_str,
                 controller_manager_name_argument,
+                param_file_argument,
             ],
             shell=True,
             output="screen",
