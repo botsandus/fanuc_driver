@@ -299,13 +299,13 @@ FanucHardwareInterface::FanucHardwareInterface()
 
 FanucHardwareInterface::~FanucHardwareInterface() = default;
 
-hardware_interface::CallbackReturn FanucHardwareInterface::on_init(const hardware_interface::HardwareInfo& info)
+hardware_interface::CallbackReturn FanucHardwareInterface::on_init(const hardware_interface::HardwareComponentInterfaceParams& params)
 {
-  if (SystemInterface::on_init(info) != CallbackReturn::SUCCESS)
+  if (SystemInterface::on_init(params) != CallbackReturn::SUCCESS)
   {
     return CallbackReturn::ERROR;
   }
-  info_ = info;
+  info_ = params.hardware_info;
 
   // Parse and configure cyclic GPIO from the yaml config.
   const auto config_path_it = info_.hardware_parameters.find("gpio_configuration");
