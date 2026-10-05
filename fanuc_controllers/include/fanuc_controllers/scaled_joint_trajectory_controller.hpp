@@ -37,7 +37,6 @@ public:
 private:
   bool last_is_connected_ = false;
   std::atomic<int> time_scale_value_{ 100 };  // Default to 100% (no scaling)
-  rclcpp::Time last_scaled_time_;
   rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr time_scale_subscriber_ = nullptr;
 
   std::string time_scale_topic_name_ = "speed_scaling_factor";
@@ -45,8 +44,7 @@ private:
   double folag_h_ = 1.0;
   double folag_tau_ = 0.2;  // time constant for first order lag in seconds
 
-  std::optional<std::reference_wrapper<hardware_interface::LoanedStateInterface>> scaling_state_interface_;
-  std::atomic<double> scaling_factor_{ 1.0 };
+  std::atomic<double> robot_scaling_factor_{ 1.0 };  // collaborative speed scaling reported by the robot
 };
 
 }  // namespace fanuc_controllers
