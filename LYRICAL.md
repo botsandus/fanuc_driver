@@ -4,7 +4,20 @@ This branch carries a community port of `fanuc_driver` (upstream `main`, equal t
 to ROS 2 Lyrical Luth on Ubuntu 26.04, which ships ros2_control 6.x. It is not endorsed
 or supported by FANUC.
 
-## Build
+## Quick setup
+
+With ROS 2 Lyrical (`ros-lyrical-desktop`) installed, clone this branch into `<workspace>/src` and run the
+script. It installs the apt extras, fetches `fanuc_description`, runs rosdep and builds
+(`SKIP_APT=1` skips the sudo step):
+
+```bash
+mkdir -p ~/ros2_ws/src && cd ~/ros2_ws/src
+git clone --branch lyrical --single-branch --recurse-submodules \
+    https://github.com/botsandus/fanuc_driver.git
+fanuc_driver/scripts/setup-lyrical.sh
+```
+
+## Manual build
 
 ```bash
 sudo apt install git-lfs ros-lyrical-desktop ros-dev-tools \
@@ -18,6 +31,24 @@ cd ~/ros2_ws
 rosdep update && rosdep install --ignore-src --from-paths src -y
 colcon build --symlink-install --cmake-args -DBUILD_TESTING=0
 ```
+
+## Connecting to a robot, status only
+
+Robot side and network follow the upstream quick start (J519 + R912 options, AUTO mode,
+teach pendant off, driver on a dedicated NIC, e.g. `192.168.1.101/24` for a controller at
+`192.168.1.100`). To read state without taking motion control or activating a trajectory
+controller:
+
+```bash
+source /opt/ros/lyrical/setup.bash && source ~/ros2_ws/install/setup.bash
+ros2 launch fanuc_moveit_config fanuc_moveit.launch.py robot_model:=crx30ia \
+    robot_ip:=192.168.1.100 motion_control:=0 initial_controller:=none
+```
+
+Then `ros2 topic echo --once /joint_states` and `ros2 topic echo --once /fanuc_gpio_controller/robot_status`.
+With `motion_control:=0` the driver does not start RMI or take motion control, and the scaled
+controller aborts any goal (for example an RViz "Plan & Execute") with
+`Aborted: STMO is inactive (!motion_possible)`. Dropping either option lets the driver take control.
 
 ## What changed against upstream
 
