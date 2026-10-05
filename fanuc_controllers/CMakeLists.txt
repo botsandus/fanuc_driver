@@ -37,6 +37,16 @@ find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(trajectory_msgs REQUIRED)
 
+# ament_target_dependencies was removed from ament_cmake in Lyrical; emulate it with the
+# exported ${pkg}_TARGETS imported targets (plain signature, to match the calls below).
+if(NOT COMMAND ament_target_dependencies)
+  function(ament_target_dependencies target)
+    foreach(dep IN LISTS ARGN)
+      target_link_libraries(${target} ${${dep}_TARGETS})
+    endforeach()
+  endfunction()
+endif()
+
 # Include directories
 include_directories(include)
 

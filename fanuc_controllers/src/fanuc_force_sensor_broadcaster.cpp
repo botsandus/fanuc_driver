@@ -6,6 +6,7 @@
 #include "fanuc_controllers/fanuc_force_sensor_broadcaster.hpp"
 #include "fanuc_client/fanuc_client.hpp"
 #include "fanuc_robot_driver/constants.hpp"
+#include "fanuc_controllers/ros2_control_compat.hpp"
 
 namespace fanuc_controllers
 {
@@ -106,18 +107,15 @@ controller_interface::return_type FanucForceSensorBroadcaster::update(const rclc
                                                                       const rclcpp::Duration& period)
 {
   // Publish all state interface data
-  if (rt_force_sensor_publisher_->trylock())
   {
-    force_sensor_msg_.force_x = state_interfaces_[index_force_sensor_[0]].get_value();
-    force_sensor_msg_.force_y = state_interfaces_[index_force_sensor_[1]].get_value();
-    force_sensor_msg_.force_z = state_interfaces_[index_force_sensor_[2]].get_value();
-    force_sensor_msg_.moment_x = state_interfaces_[index_force_sensor_[3]].get_value();
-    force_sensor_msg_.moment_y = state_interfaces_[index_force_sensor_[4]].get_value();
-    force_sensor_msg_.moment_z = state_interfaces_[index_force_sensor_[5]].get_value();
-    force_sensor_msg_.fs_type = state_interfaces_[index_force_sensor_[6]].get_value();
-
-    rt_force_sensor_publisher_->msg_ = force_sensor_msg_;
-    rt_force_sensor_publisher_->unlockAndPublish();
+    force_sensor_msg_.force_x = fanuc_controllers::state_value(state_interfaces_[index_force_sensor_[0]]);
+    force_sensor_msg_.force_y = fanuc_controllers::state_value(state_interfaces_[index_force_sensor_[1]]);
+    force_sensor_msg_.force_z = fanuc_controllers::state_value(state_interfaces_[index_force_sensor_[2]]);
+    force_sensor_msg_.moment_x = fanuc_controllers::state_value(state_interfaces_[index_force_sensor_[3]]);
+    force_sensor_msg_.moment_y = fanuc_controllers::state_value(state_interfaces_[index_force_sensor_[4]]);
+    force_sensor_msg_.moment_z = fanuc_controllers::state_value(state_interfaces_[index_force_sensor_[5]]);
+    force_sensor_msg_.fs_type = fanuc_controllers::state_value(state_interfaces_[index_force_sensor_[6]]);
+    rt_force_sensor_publisher_->try_publish(force_sensor_msg_);
   }
 
   return controller_interface::return_type::OK;
